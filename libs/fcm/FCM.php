@@ -2,13 +2,20 @@
 
 class FCM
 {
+    /**
+     * FCM constructor.
+     */
     function __construct()
     {
 
     }
 
-    // TODO: отправка сообщения одному пользователю по идентификатору регистрации fcm
-
+    /**
+     * отправка сообщения одному пользователю по идентификатору регистрации fcm
+     * @param $token
+     * @param $message
+     * @return mixed
+     */
     public function sendMessage($token, $message)
     {
         $fields = array(
@@ -19,8 +26,12 @@ class FCM
         return $this->sendPushNotification($fields);
     }
 
-    // TODO: Отправка сообщения в топик
-
+    /**
+     * Отправка сообщения в топик
+     * @param $token
+     * @param $message
+     * @return mixed
+     */
     public function sendToTopic($token, $message)
     {
         $fields = array(
@@ -31,8 +42,12 @@ class FCM
         return $this->sendPushNotification($fields);
     }
 
-    // TODO: отправка push-сообщения нескольким пользователям по идентификаторам регистрации fcm
-
+    /**
+     * отправка push-сообщения нескольким пользователям по идентификаторам регистрации fcm
+     * @param $registration_ids
+     * @param $message
+     * @return mixed
+     */
     public function sendMultiple($registration_ids, $message)
     {
         $fields = array(
@@ -44,8 +59,11 @@ class FCM
         return $this->sendPushNotification($fields);
     }
 
-    // TODO: функция делает запрос curl для серверов fcm
-
+    /**
+     * функция делает запрос curl для сервера fcm
+     * @param $fields
+     * @return mixed
+     */
     private function sendPushNotification($fields)
     {
         include_once __DIR__ . '/../../include/config.php';

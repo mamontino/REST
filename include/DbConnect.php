@@ -9,19 +9,23 @@ class dbConnect
 
     }
 
-    // TODO: Установка подключения к базе данных
-
+    /**
+     * Установка подключения к базе данных
+     **/
     function connect()
     {
-        // TODO: Подключение файла config.php для получения констант из базы данных
-
+        /**
+         * Подключение файла config.php для получения констант из базы данных
+         **/
         require_once __DIR__ . '/config.php';
 
-        // TODO: Соединение с базой данных
-
+        /**
+         * Соединение с базой данных
+         **/
         try
         {
-            $this->con = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
+            $this->con = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME, DB_PORT);
+            $this->con->set_charset("utf8");
             return $this->con;
         } catch (Exception $e)
         {

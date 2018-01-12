@@ -145,10 +145,10 @@ class userOperation
 
     // TODO: Получение списка всех сообщений комнаты для пользователя
 
-    public function getMessagesUser($id_room)
+    public function getMessagesUser($id_room, $id_message)
     {
-        $stmt = $this->con->prepare("SELECT * FROM messages WHERE id_room=?");
-        $stmt->bind_param("i", $id_room);
+        $stmt = $this->con->prepare("SELECT * FROM messages WHERE id_room=? AND id > ?");
+        $stmt->bind_param("ii", $id_room, $id_message);
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();

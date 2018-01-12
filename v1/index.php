@@ -18,7 +18,10 @@ function echoResponse($status_code, $response)
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
 }
 
-// TODO: Проверка валидности параметров (проверяет пустое ли значение было передано в поле)
+/**
+ * Проверка валидности параметров (проверяет пустое ли значение было передано в поле)
+ * @param $required_fields
+ */
 
 function verifyRequiredParams($required_fields)
 {
@@ -43,7 +46,7 @@ function verifyRequiredParams($required_fields)
 
     if ($error)
     {
-        $response = [];
+        $response = array();
         $app = \Slim\Slim::getInstance();
         $response["error"] = true;
         $response["message"] = 'Поля ' . substr($error_fields, 0, -2) . ' не должны быть пустыми';
@@ -53,12 +56,14 @@ function verifyRequiredParams($required_fields)
     }
 }
 
-// TODO: Аутентификация пользователя
+/**
+ * Аутентификация пользователя при повторном входе
+ **/
 
 function authenticateUser()
 {
     $headers = apache_request_headers();
-    $response = [];
+    $response = array();
     $app = \Slim\Slim::getInstance();
 
     if (isset($headers['Authorization']))
@@ -83,10 +88,14 @@ function authenticateUser()
     }
 }
 
+/**
+ * Аутентификация доктора
+ **/
+
 function authenticateDoctor()
 {
     $headers = apache_request_headers();
-    $response = [];
+    $response = array();
     $app = \Slim\Slim::getInstance();
 
     if (isset($headers['Authorization']))
@@ -111,12 +120,14 @@ function authenticateDoctor()
     }
 }
 
-// TODO: Аутентификация пользователя при первом входе
+/**
+ * Аутентификация пользователя при первом входе
+ **/
 
 function authenticate()
 {
     $headers = apache_request_headers();
-    $response = [];
+    $response = array();
     $app = \Slim\Slim::getInstance();
 
     if (isset($headers['Authorization']))
@@ -141,51 +152,13 @@ function authenticate()
     }
 }
 
-// TODO: Регистрация пользователя
-
-/* *
- * URL: http://localhost/api/v1/register/user
- * Parameters: username, password
+/**
+ * Вход в аккаунт для пользователя(можно добавить проверку api_key)
+ * URL: http://localhost/api/v1/login
+ * Parameters: none
+ * Authorization: API Key in Request Header
  * Method: POST
- * */
-
-//$app->post('/register/user', function () use ($app)
-//{
-//    verifyRequiredParams(array('username', 'password'));
-//    $response = array();
-//    $username = $app->request->post('username');
-//    $password = $app->request->post('password');
-//    $db = new verifyOperation();
-//
-//    $res = $db->registerUser($username, $password);
-//
-//    if ($res == ANSWER_OK)
-//    {
-//        $response["error"] = false;
-//        $response["response"] = "Регистрация прошла успешно";
-//        echoResponse(200, $response);
-//
-//    } else if ($res == ANSWER_ERROR)
-//    {
-//        $response["error"] = true;
-//        $response["response"] = "Системная ошибка, попробуйте позже";
-//        echoResponse(500, $response);
-//
-//    } else if ($res == ANSWER_INVALID)
-//    {
-//        $response["error"] = true;
-//        $response["response"] = "invalid name";
-//        echoResponse(200, $response);
-//    }
-//});
-
-// TODO: Вход в аккаунт для пользователя(можно добавить проверку api_key)
-
-/* *
- * URL: http://localhost/api/v1/login/user
- * Parameters: username, password
- * Method: POST
- * */
+ **/
 
 $app->post('/login', 'authenticate', function () use ($app)
 {
@@ -195,7 +168,7 @@ $app->post('/login', 'authenticate', function () use ($app)
     $password = $app->request->post('password');
     $verify = new verifyOperation();
     $db = new mhOperation();
-    $response = [];
+    $response = array();
 
     if ($verify->loginUser($username, $password))
     {
@@ -210,13 +183,13 @@ $app->post('/login', 'authenticate', function () use ($app)
     }
 });
 
-// TODO: Вход в аккаунт для пользователя(можно добавить проверку api_key)
-
-/* *
- * URL: http://localhost/api/v1/login/user
- * Parameters: username, password
- * Method: POST
- * */
+/**
+ * Вход в аккаунт для доктора
+ * URL: http://localhost/api/v1/login/doctor
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->post('/login/doctor', 'authenticate', function () use ($app)
 {
@@ -226,7 +199,7 @@ $app->post('/login/doctor', 'authenticate', function () use ($app)
     $password = $app->request->post('password');
     $verify = new verifyOperation();
     $db = new mhOperation();
-    $response = [];
+    $response = array();
 
     if ($verify->loginDoctor($username, $password))
     {
@@ -241,6 +214,14 @@ $app->post('/login/doctor', 'authenticate', function () use ($app)
     }
 });
 
+/**
+ * Получение рользователя по $username
+ * URL: http://localhost/api/v1/username
+ * @param $username
+ * Authorization: API Key in Request Header
+ * Method: POST
+ **/
+
 $app->post('/username', 'authenticate', function () use ($app)
 {
     verifyRequiredParams(array('username'));
@@ -254,14 +235,14 @@ $app->post('/username', 'authenticate', function () use ($app)
 
         if ($result)
         {
-            $response = [];
+            $response = array();
             $response['error'] = false;
             $response['message'] = REQUEST_OK;
             $response['response'] = " ";
             echoResponse(200, $response);
         } else
         {
-            $response = [];
+            $response = array();
             $response['error'] = true;
             $response['message'] = REQUEST_ERROR;
             $response['response'] = " ";
@@ -269,7 +250,7 @@ $app->post('/username', 'authenticate', function () use ($app)
         }
     } catch (Exception $e)
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
         $response['message'] = DB_ERROR;
         $response['response'] = $e;
@@ -277,13 +258,14 @@ $app->post('/username', 'authenticate', function () use ($app)
     }
 });
 
-// TODO: Отправка токена на сервер
-
-/* *
- * URL: http://localhost/api/v1/login/user
- * Parameters: id_user, token
- * Method: POST
- * */
+/**
+ * Отправка токена на сервер
+ * URL: http://localhost/api/v1/send/token
+ * @param $id_user
+ * @param $fb_token
+ * Authorization: API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->post('/send/token', 'authenticateUser', function () use ($app)
 {
@@ -297,7 +279,7 @@ $app->post('/send/token', 'authenticateUser', function () use ($app)
         $db->updateUserToken($id_user, $token);
     } catch (Exception $e)
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
         $response['message'] = DB_ERROR;
         $response['response'] = $e;
@@ -305,19 +287,21 @@ $app->post('/send/token', 'authenticateUser', function () use ($app)
     }
 });
 
-// TODO: Отправка сообщения на сервер
-
-/* *
- * URL: http://localhost/api/v1/send/message
- * Parameters: id_user, id_room, message
+/**
+ * Отправка сообщения на сервер
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * @param $id_user
+ * @param $id_room
+ * @param $message
+ * Authorization: API Key in Request Header
  * Method: POST
- * */
+ **/
 
 $app->post('/send/message', 'authenticateUser', function ()
 {
     global $app;
     $db = new userOperation();
-    $response = [];
+    $response = array();
 
     verifyRequiredParams(array('message'));
 
@@ -347,12 +331,6 @@ $app->post('/send/message', 'authenticateUser', function ()
             $response['message'] = REQUEST_OK;
             $response['response'] = " ";
             echoResponse(200, $response);
-        } else
-        {
-            $response['error'] = true;
-            $response['message'] = INVALID_FB_KEY;
-            $response['response'] = " ";
-            echoResponse(402, $response);
         }
     } else
     {
@@ -363,19 +341,19 @@ $app->post('/send/message', 'authenticateUser', function ()
     }
 });
 
-// TODO: Отправка сообщения на сервер от доктора
-
-/* *
- * URL: http://localhost/api/v1/send/answer
- * Parameters: id_doctor, id_room, message
- * Method: POST
- * */
+/**
+ * Отправка сообщения на сервер от доктора
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->post('/send/answer', 'authenticateDoctor', function ()
 {
     global $app;
     $db = new doctorOperation();
-    $response = [];
+    $response = array();
 
     verifyRequiredParams(array('message'));
 
@@ -422,49 +400,13 @@ $app->post('/send/answer', 'authenticateDoctor', function ()
 
 });
 
-// TODO: Вход в аккаунт для доктора (можно добавить проверку api_key)
-
-/* *
- * URL: http://localhost/api/v1/login/doctor
- * Parameters: username, password
- * Method: POST
- * */
-
-//$app->post('/login/doctor', function () use ($app)
-//{
-//    verifyRequiredParams(array('username', 'password'));
-//    $username = $app->request->post('username');
-//    $password = $app->request->post('password');
-//    $verify = new verifyOperation();
-//    $db = new mhOperation();
-//    $response = array();
-//
-//    if ($verify->loginUser($username, $password))
-//    {
-//        $user = $db->getUserByName($username);
-//        $response['error'] = false;
-//        $response['id'] = $user['id'];
-//        $response['id_kl'] = $user['id_kl'];
-//        $response['name'] = $user['name'];
-//        $response['username'] = $user['username'];
-//        $response['api_key'] = $user['api_key'];
-//        $response['id_centr'] = $user['id_centr'];
-//    } else
-//    {
-//        $response['error'] = true;
-//        $response['message'] = "invalid name or pass";
-//    }
-//    echoResponse(200, $response);
-//});
-
-// TODO: Получение списка всех медицинских центров
-
-/* *
+/**
+ * Получение списка всех медицинских центров
  * URL: http://localhost/api/v1/centres
  * Parameters: none
- * Authorization: Put API Key in Request Header
- * Method: PUT
- * */
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/centres', 'authenticateUser', function () use ($app)
 {
@@ -476,22 +418,21 @@ $app->get('/centres', 'authenticateUser', function () use ($app)
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение медицинкого центра по ID
-
-/* *
- * URL: http://localhost/api/v1/centres/:id
- * Parameters: none
+/**
+ * Получение медицинкого центра по ID
+ * URL: http://localhost/api/v1/centres/:id_center
+ * @param $id_center
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 
 $app->get('/centres/:id_center', 'authenticateUser', function ($id_center) use ($app)
@@ -504,21 +445,21 @@ $app->get('/centres/:id_center', 'authenticateUser', function ($id_center) use (
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение всех специальностей по id клиники
-
-/* *
- * URL: http://localhost/api/v1/spec/:id_center
- * Parameters: title, id_spec, admission, price
- * Method: POST
- * */
+/**
+ * Получение всех специальностей по id клиники
+ * URL: http://localhost/api/v1/category/:id_center
+ * @param $id_center
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/category/:id_center', 'authenticateUser', function ($id_center) use ($app)
 {
@@ -530,21 +471,52 @@ $app->get('/category/:id_center', 'authenticateUser', function ($id_center) use 
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка сотрудников по id клиники
+/**
+ * Получение всех специальностей по id клиники
+ * URL: http://localhost/api/v1/cat/:id_center/:id_doctor
+ * @param $id_center
+ * @param $id_doctor
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
-/* *
+$app->get('/category/doctor/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_doctor) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getCategoryByDoctor($id_center, $id_doctor);
+
+    $response = array();
+
+    if ($result != null && count($result) > 0)
+    {
+        $response['error'] = false;
+        $response['message'] = REQUEST_OK;
+        $response['response'] = $result;
+        echoResponse(200, $response);
+    } else
+    {
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение списка сотрудников по id клиники
  * URL: http://localhost/api/v1/doctors/:id_center
- * Parameters: title, id_spec, admission, price
- * Method: POST
- * */
+ * @param $id_center
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/doctors/:id_center', 'authenticateUser', function ($id_center) use ($app)
 {
@@ -556,22 +528,49 @@ $app->get('/doctors/:id_center', 'authenticateUser', function ($id_center) use (
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
+/**
+ * Получение списка сотрудников по id услуги
+ * URL: http://localhost/api/v1/staff/:id_center/:id_service
+ * @param $id_center
+ * @param $id_service
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
-// TODO: Получение конкретного сотрудника по ID
+$app->get('/staff/:id_center/:id_service', 'authenticateUser', function ($id_center, $id_service) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getDoctorByService($id_center, $id_service);
 
-/* *
+    if ($result != null)
+    {
+        echoResponse(200, $result);
+    } else
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение конкретного сотрудника по ID
  * URL: http://localhost/api/v1/doctors/:id_center/:id
- * Parameters: title, id_spec, admission, price
- * Method: POST
- * */
+ * @param $id_center
+ * @param $id
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/doctors/:id_center/:id', 'authenticateUser', function ($id_center, $id) use ($app)
 {
@@ -584,22 +583,48 @@ $app->get('/doctors/:id_center/:id', 'authenticateUser', function ($id_center, $
     } else
     {
 
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка всех услуг медицинского центра
+/**
+ * Получение списка сотрудников по специальности
+ * URL: http://localhost/api/v1/staff/:id_center/:id_spec
+ * @param $id_center
+ * @param $id_spec
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
-/* *
+$app->get('/staff/:id_center/:id_spec', 'authenticateUser', function ($id_center, $id_spec) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getDoctorBySpec($id_center, $id_spec);
+
+    if ($result != null)
+    {
+        echoResponse(200, $result);
+    } else
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение списка всех услуг медицинского центра
  * URL: http://localhost/api/v1/services/:id_center
- * Parameters: none
- * Authorization: Put API Key in Request Header
- * Method: PUT
- * */
+ * @param $id_center
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/services/:id_center', 'authenticateUser', function ($id_center) use ($app)
 {
@@ -611,22 +636,81 @@ $app->get('/services/:id_center', 'authenticateUser', function ($id_center) use 
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка услуг медицинского центра по специальности
+/**
+ * Получение списка всех услуг медицинского центра
+ * URL: http://localhost/api/v1/services/doctor/:id_center/:id_doctor
+ * @param $id_center
+ * @param $id_doctor
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
-/* *
- * URL: http://localhost/api/v1/services/:id_center/:id_spec
- * Parameters: none
+$app->get('/services/doctor/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_doctor) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getServiceByDoctor($id_center, $id_doctor);
+
+    $response = array();
+
+    if ($result != null || count($result) > 0)
+    {
+        $response['error'] = true;
+        $response['message'] = REQUEST_OK;
+        $response['response'] = $result;
+        echoResponse(200, $response);
+    } else
+    {
+
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение списка акций медицинского центра
+ * URL: http://localhost/api/v1/sale/:id_center/:dt
+ * @param $id_center
+ * @param $dt
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
+
+$app->get('/sale/:id_center/:dt', 'authenticateUser', function ($id_center, $dt) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getSaleByCenter($id_center, $dt);
+
+    if ($result != null)
+    {
+        echoResponse(200, $result);
+    } else
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение списка услуг медицинского центра по специальности
+ * URL: http://localhost/api/v1/services/:id_center/:id_spec
+ * @param $id_center
+ * @param $id_spec
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
 
 $app->get('/services/:id_center/:id_spec', 'authenticateUser', function ($id_center, $id_spec) use ($app)
 {
@@ -638,22 +722,22 @@ $app->get('/services/:id_center/:id_spec', 'authenticateUser', function ($id_cen
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка посещений медицинского центра
-
-/* *
- * URL: http://localhost/api/v1/visits/:id_center/:id_user
- * Parameters: none
- * Authorization: Put API Key in Request Header
+/**
+ * Получение списка посещений медицинского центра
+ * URL: http://localhost/api/v1/visits/:id_center/:id_user'
+ * @param $id_center
+ * @param $id_user
+ * Authorization: API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 $app->get('/visits/:id_center/:id_user', 'authenticateUser', function ($id_center, $id_user) use ($app)
 {
@@ -665,77 +749,74 @@ $app->get('/visits/:id_center/:id_user', 'authenticateUser', function ($id_cente
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 
 });
 
-// TODO: Получение рассписания доктора
+///**
+// * Получение рассписания доктора
+// * URL: http://localhost/api/v1/rooms/:id_user
+// * Parameters: none
+// * Authorization: Put API Key in Request Header
+// * Method: PUT
+// **/
+//
+//$app->get('/schedule/doctor/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_doctor) use ($app)
+//{
+//    $db = new mhOperation();
+//    $result = $db->getScheduleByDoctor($id_center, $id_doctor);
+//
+//    if ($result != null)
+//    {
+//        echoResponse(200, $result);
+//    } else
+//    {
+//        $response = array();
+//        $response['error'] = true;
+//        $response['message'] = EMPTY_DATA;
+//        $response['response'] = NULL;
+//        echoResponse(404, $response);
+//    }
+//});
+//
+///**
+// * Получение рассписания по наименованию услуги
+// * URL: http://localhost/api/v1/rooms/:id_user
+// * Parameters: none
+// * Authorization: Put API Key in Request Header
+// * Method: PUT
+// **/
+//
+//$app->get('/schedule/service/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_service) use ($app)
+//{
+//    $db = new mhOperation();
+//    $result = $db->getScheduleByService($id_center, $id_service);
+//
+//    if ($result != null)
+//    {
+//        echoResponse(200, $result);
+//    } else
+//    {
+//        $response = array();
+//        $response['error'] = true;
+//        $response['message'] = EMPTY_DATA;
+//        $response['response'] = NULL;
+//        echoResponse(404, $response);
+//    }
+//});
 
-/* *
- * URL: http://localhost/api/v1/schedule/doctor/:id_center/:id_doctor
- * Parameters: none
- * Authorization: Put API Key in Request Header
- * Method: PUT
- * */
-
-$app->get('/schedule/doctor/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_doctor) use ($app)
-{
-    $db = new mhOperation();
-    $result = $db->getScheduleByDoctor($id_center, $id_doctor);
-
-    if ($result != null)
-    {
-        echoResponse(200, $result);
-    } else
-    {
-        $response = [];
-        $response['error'] = true;
-        $response['message'] = DB_ERROR;
-        $response['response'] = NULL;
-        echoResponse(404, $response);
-    }
-});
-
-// TODO: Получение рассписания по наименованию услуги
-
-/* *
- * URL: http://localhost/api/v1/schedule/service/:id_center/:id_service
- * Parameters: none
- * Authorization: Put API Key in Request Header
- * Method: PUT
- * */
-
-$app->get('/schedule/service/:id_center/:id_doctor', 'authenticateUser', function ($id_center, $id_service) use ($app)
-{
-    $db = new mhOperation();
-    $result = $db->getScheduleByService($id_center, $id_service);
-
-    if ($result != null)
-    {
-        echoResponse(200, $result);
-    } else
-    {
-        $response = [];
-        $response['error'] = true;
-        $response['message'] = DB_ERROR;
-        $response['response'] = NULL;
-        echoResponse(404, $response);
-    }
-});
-
-// TODO: Получение списка комнат для пользователя
-
-/* *
+/**
+ * Получение списка комнат для пользователя
  * URL: http://localhost/api/v1/rooms/:id_user
  * Parameters: none
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 $app->get('/rooms/:id_user', 'authenticateUser', function ($id_user) use ($app)
 {
@@ -747,22 +828,21 @@ $app->get('/rooms/:id_user', 'authenticateUser', function ($id_user) use ($app)
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка комнат для доктора
-
-/* *
+/**
+ * Получение списка комнат для доктора
  * URL: http://localhost/api/v1/rooms/:id_user
  * Parameters: none
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 $app->get('/rooms/doctor/:id_doctor', 'authenticateDoctor', function ($id_doctor) use ($app)
 {
@@ -774,22 +854,21 @@ $app->get('/rooms/doctor/:id_doctor', 'authenticateDoctor', function ($id_doctor
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка комнат для пользователя с полной информацией
-
-/* *
+/**
+ * Получение списка комнат для пользователя с полной информацией
  * URL: http://localhost/api/v1/rooms/:id_user
  * Parameters: none
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 $app->get('/room/:id_user/:id_room', 'authenticateUser', function ($id_user, $id_room) use ($app)
 {
@@ -801,22 +880,21 @@ $app->get('/room/:id_user/:id_room', 'authenticateUser', function ($id_user, $id
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-// TODO: Получение списка комнат для доктора с полной информацией
-
-/* *
+/**
+ * Получение списка комнат для доктора с полной информацией
  * URL: http://localhost/api/v1/rooms/:id_user
  * Parameters: none
  * Authorization: Put API Key in Request Header
  * Method: PUT
- * */
+ **/
 
 $app->get('/room/doctor/:id_doctor/:id_room', 'authenticateDoctor', function ($id_doctor, $id_room) use ($app)
 {
@@ -828,30 +906,44 @@ $app->get('/room/doctor/:id_doctor/:id_room', 'authenticateDoctor', function ($i
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
 
-$app->get('/message/:id_room', 'authenticateUser', function ($id_room) use ($app)
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
+
+$app->get('/message/:id_room/:id_message', 'authenticateUser', function ($id_room, $id_message) use ($app)
 {
     $db = new userOperation();
-    $result = $db->getMessagesUser($id_room);
+    $result = $db->getMessagesUser($id_room, $id_message);
     if ($result != null)
     {
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/unread/:id_room', 'authenticateUser', function ($id_room) use ($app)
 {
@@ -862,13 +954,20 @@ $app->get('/unread/:id_room', 'authenticateUser', function ($id_room) use ($app)
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/message/:id_room/:id', 'authenticateUser', function ($id_room, $id) use ($app)
 {
@@ -879,13 +978,20 @@ $app->get('/message/:id_room/:id', 'authenticateUser', function ($id_room, $id) 
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/message/doctor/:id_room', 'authenticateDoctor', function ($id_room) use ($app)
 {
@@ -896,13 +1002,20 @@ $app->get('/message/doctor/:id_room', 'authenticateDoctor', function ($id_room) 
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/unread/doctor/:id_room/:id_doctor', 'authenticateDoctor', function ($id_room, $id_doctor) use ($app)
 {
@@ -913,13 +1026,20 @@ $app->get('/unread/doctor/:id_room/:id_doctor', 'authenticateDoctor', function (
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/message/doctor/:id_room/:id', 'authenticateDoctor', function ($id_room, $id) use ($app)
 {
@@ -930,13 +1050,20 @@ $app->get('/message/doctor/:id_room/:id', 'authenticateDoctor', function ($id_ro
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/read/:id_room/:id_user', 'authenticateUser', function ($id_room, $id_user) use ($app)
 {
@@ -948,13 +1075,20 @@ $app->get('/read/:id_room/:id_user', 'authenticateUser', function ($id_room, $id
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/read/doctor/:id_room/:id_doctor', 'authenticateDoctor', function ($id_room, $id_doctor) use ($app)
 {
@@ -966,13 +1100,20 @@ $app->get('/read/doctor/:id_room/:id_doctor', 'authenticateDoctor', function ($i
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameters: none
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/last/doctor/:id_room', 'authenticateDoctor', function ($id_room) use ($app)
 {
@@ -984,13 +1125,21 @@ $app->get('/last/doctor/:id_room', 'authenticateDoctor', function ($id_room) use
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
     }
 });
+
+/**
+ * URL: http://localhost/api/v1/rooms/:id_user
+ * Parameter:
+ * $id_room - id комнаты в чате
+ * Authorization: Put API Key in Request Header
+ * Method: PUT
+ **/
 
 $app->get('/last/:id_room', 'authenticateUser', function ($id_room) use ($app)
 {
@@ -1002,11 +1151,295 @@ $app->get('/last/:id_room', 'authenticateUser', function ($id_room) use ($app)
         echoResponse(200, $result);
     } else
     {
-        $response = [];
+        $response = array();
         $response['error'] = true;
-        $response['message'] = DB_ERROR;
+        $response['message'] = EMPTY_DATA;
         $response['response'] = NULL;
         echoResponse(404, $response);
+    }
+});
+
+/**
+ * URL: http://localhost/api/v1/schedule/doctor/:id_center/:id_doctor/:date/:adm
+ * Parameter: $id_doctor - id доктора в центе
+ * Parameter: $id_service - id услуги в центре
+ * Parameter: $adm - длительность приема
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
+
+$app->get('/schedule/doctor/:id_center/:id_doctor/:date/:adm', function ($id_center, $id_doctor, $date, $adm) use ($app)
+{
+    $db = new mhOperation();
+
+    $week = array();
+
+    $response = array();
+    $response['error'] = false;
+    $response['message'] = REQUEST_OK;
+    $response['response'] = array();
+
+    $result = $db->getDoctorById($id_center, $id_doctor);
+
+    $full_name = $result["response"][0]["full_name"];
+
+    $day = 0;
+
+    while ($day < 7)
+    {
+        $day++;
+        $result = $db->getRecordForDate($date, $id_doctor, $adm);
+        if ($result == NULL)
+        {
+            $week['id_doctor'] = $id_doctor;
+            $week['full_name'] = $full_name;
+            $week['is_work'] = true;
+            $week['adm_day'] = $date;
+            $week['adm_time'] = null;
+            array_push($response['response'], $week);
+        } else
+        {
+            if ($result == NO_WORK)
+            {
+                $week['id_doctor'] = $id_doctor;
+                $week['full_name'] = $full_name;
+                $week['is_work'] = false;
+                $week['adm_day'] = $date;
+                $week['adm_time'] = null;
+                array_push($response['response'], $week);
+            } else
+            {
+                $week['id_doctor'] = $id_doctor;
+                $week['full_name'] = $full_name;
+                $week['is_work'] = true;
+                $week['adm_day'] = $date;
+                $week['adm_time'] = $result;
+                array_push($response['response'], $week);
+            }
+        }
+        $next = date_create_from_format("d.m.Y", $date);
+        $next = date_modify($next, '1 day');
+        $date = $next->format('d.m.Y');
+    }
+    echoResponse(200, $response);
+});
+
+/**
+ * URL: http://localhost/api/v1/schedule/service/:id_service/:date/:adm
+ * Parameter: $id_center - id центра
+ * Parameter: $id_doctor - id доктора в центе
+ * Parameter: $id_service - id услуги в центре
+ * Parameter: $adm - длительность приема
+ * Authorization: API Key in Request Header
+ * Method: GET
+ **/
+
+$app->get('/schedule/service/:id_center/:id_service/:date/:adm', function ($id_center, $id_service, $date, $adm) use ($app)
+{
+    $db = new mhOperation();
+
+    $week = array();
+
+    $response = array();
+    $response['error'] = false;
+    $response['message'] = REQUEST_OK;
+    $response['response'] = array();
+
+    $result = $db->getDoctorByService($id_center, $id_service);
+
+    foreach ($result as $value)
+    {
+        $id_doctor = (string)$value['id_doctor'];
+        $full_name = $value['full_name'];
+
+        $day = 0;
+
+        $date_cash = $date;
+
+    while ($day < 7)
+    {
+        $day++;
+
+        $result = $db->getRecordForDate($date_cash, $id_doctor, $adm);
+
+        if ($result == NULL)
+        {
+            $week['id_doctor'] = $id_doctor;
+            $week['full_name'] = $full_name;
+            $week['is_work'] = true;
+            $week['adm_day'] = $date_cash;
+            $week['adm_time'] = null;
+            array_push($response['response'], $week);
+        } else
+        {
+            if ($result == NO_WORK)
+            {
+                $week['id_doctor'] = $id_doctor;
+                $week['full_name'] = $full_name;
+                $week['is_work'] = false;
+                $week['adm_day'] = $date_cash;
+                $week['adm_time'] = null;
+                array_push($response['response'], $week);
+            } else
+            {
+                $week['id_doctor'] = $id_doctor;
+                $week['full_name'] = $full_name;
+                $week['is_work'] = true;
+                $week['adm_day'] = $date_cash;
+                $week['adm_time'] = $result;
+                array_push($response['response'], $week);
+            }
+        }
+        $next = date_create_from_format("d.m.Y", $date_cash);
+        $next = date_modify($next, '1 day');
+        $date_cash = $next->format('d.m.Y');
+    }
+}
+    echoResponse(200, $response);
+});
+
+/**
+ * Получение текущей даты с сервера
+ * URL: http://localhost/api/v1/date
+ * Parameters: none
+ * Authorization: API Key in Request Header
+ * Method: PUT
+ **/
+
+$app->get('/date', 'authenticateUser', function () use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getDateCurrent();
+    $response = array();
+
+    if ($result != NULL)
+    {
+        $response['error'] = false;
+        $response['message'] = REQUEST_OK;
+        $response['response'] = $result;
+        echoResponse(200, $response);
+    } else
+    {
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Получение отзывов о приложении
+ * URL: http://localhost/api/v1/review/:id
+ * Parameter: @param $id - получение отзыва после $id
+ * Если $id == 0, получение всех отзывов
+ * Authorization: Put API Key in Request Header
+ * Method: GET
+ *
+ **/
+
+$app->get('/review/:id', function ($id) use ($app)
+{
+    $db = new mhOperation();
+    $result = $db->getReview($id);
+
+    if ($result != NULL)
+    {
+        echoResponse(200, $result);
+    } else
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = NULL;
+        echoResponse(404, $response);
+    }
+});
+
+/**
+ * Отправка отзыва о приложении
+ * URL: http://localhost/api/v1/send/review
+ * Parameters: @param $id_user - id пользователя
+ * @param $message - тектовое сообщение
+ * @param $star - оценка (от 0 до 5)
+ * Authorization: API Key in Request Header
+ * Method: POST
+ **/
+
+$app->post('/send/review', 'authenticateUser', function () use ($app)
+{
+    verifyRequiredParams(array('id_user', 'message', 'star'));
+    $id_user = $app->request->post('id_user');
+    $message = $app->request->post('message');
+    $star = $app->request->post('star');
+    try
+    {
+        $db = new mhOperation();
+        $db->sendReview($id_user, $message, $star);
+    } catch (Exception $e)
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = $e;
+        echoResponse(500, $response);
+    }
+});
+
+/**
+ * Отправка ответа на отзыв о приложении
+ * URL: http://localhost/api/v1/send/review/answer
+ * Parameter: @param $id_user - id пользователя
+ * Parameter: @param $message - тектовое сообщение
+ * Parameter: @param $star - оценка (от 0 до 5)
+ * Authorization: API Key in Request Header
+ * Method: POST
+ **/
+
+$app->post('/send/review/answer', function () use ($app)
+{
+    verifyRequiredParams(array('id_user', 'message', 'star'));
+    $id_user = $app->request->post('id_user');
+    $message = $app->request->post('message');
+    $star = $app->request->post('star');
+    try
+    {
+        $db = new mhOperation();
+        $db->sendReviewAnswer($id_user, $message, $star);
+    } catch (Exception $e)
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = $e;
+        echoResponse(500, $response);
+    }
+});
+
+/**
+ * Запись на прием
+ */
+$app->post('/record', 'authenticateUser', function () use ($app)
+{
+    verifyRequiredParams(array('id_sotr', 'data', 'time_zap', 'id_kl', 'id_spec', 'id_ysl', 'dlit'));
+    $id_sotr = $app->request->post('$id_sotr');
+    $data = $app->request->post('data');
+    $time_zap = $app->request->post('time_zap');
+    $id_kl = $app->request->post('id_kl');
+    $id_spec = $app->request->post('id_spec');
+    $id_ysl = $app->request->post('id_ysl');
+    $dlit = $app->request->post('dlit');
+
+    try
+    {
+        $db = new mhOperation();
+        $db->recording($id_sotr, $data, $time_zap, $id_kl, $id_spec, $id_ysl, $dlit);
+    } catch (Exception $e)
+    {
+        $response = array();
+        $response['error'] = true;
+        $response['message'] = EMPTY_DATA;
+        $response['response'] = $e;
+        echoResponse(500, $response);
     }
 });
 
